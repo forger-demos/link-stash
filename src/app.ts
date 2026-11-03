@@ -1,6 +1,7 @@
 import type {Database} from 'bun:sqlite';
 import {health} from './health';
-import {countLinks} from './storage';
+import {validateLink} from './links';
+import {addLink, listLinks} from './storage';
 
 const publicDir = new URL('../public/', import.meta.url);
 
@@ -8,9 +9,17 @@ const json = (body: unknown, status = 200): Response => Response.json(body, {sta
 
 export async function handle(req: Request, db: Database): Promise<Response> {
   const {pathname} = new URL(req.url);
+  if (pathname === '/api/links') {
+    if (req.method === 'GET') return json({links: listLinks(db)});
+    if (req.method === 'POST') {
+      const result = validateLink(await req.json().catch(() => null));
+      if (!result.ok) return json({error: result.message, field: result.field}, 400);
+      return json(addLink(db, result.value.url, result.value.title), 201);
+    }
+    return json({error: 'method not allowed'}, 405);
+  }
   if (req.method !== 'GET') return json({error: 'method not allowed'}, 405);
   if (pathname === '/api/health') return json(health());
-  if (pathname === '/api/links') return json({count: countLinks(db)});
   if (pathname.startsWith('/api/')) return json({error: 'not found'}, 404);
 
   const name = pathname === '/' ? 'index.html' : pathname.slice(1);

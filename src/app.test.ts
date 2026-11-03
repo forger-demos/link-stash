@@ -11,9 +11,43 @@ test('health returns ok', async () => {
   expect(await res.json()).toEqual({ok: true});
 });
 
-test('links reports the stored count', async () => {
-  const res = await get('/api/links');
-  expect(await res.json()).toEqual({count: 0});
+const post = (db: ReturnType<typeof openDatabase>, body: unknown) =>
+  handle(
+    new Request('http://test/api/links', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: typeof body === 'string' ? body : JSON.stringify(body),
+    }),
+    db,
+  );
+const list = async (db: ReturnType<typeof openDatabase>) =>
+  (await (await handle(new Request('http://test/api/links'), db)).json()) as {links: {url: string; title: string}[]};
+
+test('links starts empty', async () => {
+  expect(await (await get('/api/links')).json()).toEqual({links: []});
+});
+
+test('a saved link is listed newest first', async () => {
+  const db = openDatabase(':memory:');
+  const res = await post(db, {url: 'https://a.example', title: 'A'});
+  expect(res.status).toBe(201);
+  expect(await res.json()).toMatchObject({url: 'https://a.example', title: 'A'});
+  await post(db, {url: 'https://b.example'});
+  expect((await list(db)).links.map((l) => l.url)).toEqual(['https://b.example', 'https://a.example']);
+});
+
+test('an invalid address is refused and nothing is stored', async () => {
+  const db = openDatabase(':memory:');
+  for (const body of [{url: 'ftp://x.example'}, {url: ''}, 'not json']) {
+    const res = await post(db, body);
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({field: 'url'});
+  }
+  expect((await list(db)).links).toEqual([]);
+});
+
+test('other methods on links are rejected', async () => {
+  expect((await get('/api/links', 'DELETE')).status).toBe(405);
 });
 
 test('unknown api paths are 404', async () => {

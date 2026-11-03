@@ -28,3 +28,20 @@ export function openDatabase(path: string): Database {
 export function countLinks(db: Database): number {
   return (db.query('SELECT COUNT(*) AS n FROM links').get() as {n: number}).n;
 }
+
+export interface Link {
+  id: number;
+  url: string;
+  title: string;
+  created_at: string;
+}
+
+export function addLink(db: Database, url: string, title: string): Link {
+  return db
+    .query('INSERT INTO links (url, title) VALUES (?, ?) RETURNING id, url, title, created_at')
+    .get(url, title) as Link;
+}
+
+export function listLinks(db: Database): Link[] {
+  return db.query('SELECT id, url, title, created_at FROM links ORDER BY id DESC').all() as Link[];
+}

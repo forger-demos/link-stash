@@ -10,6 +10,14 @@
 <body>
   <main>
     <h1>Link stash</h1>
+    <form id="form" novalidate>
+      <label for="url">Address</label>
+      <input id="url" name="url" type="url" required autocomplete="off" aria-describedby="url-error">
+      <p id="url-error" class="error" role="alert" hidden></p>
+      <label for="title">Title (optional)</label>
+      <input id="title" name="title" type="text" autocomplete="off">
+      <button id="save" type="submit">Save</button>
+    </form>
     <p id="empty" class="empty">No links saved yet</p>
     <ul id="links" hidden></ul>
   </main>

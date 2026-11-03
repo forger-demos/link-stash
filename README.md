@@ -6,6 +6,14 @@ A sample product built by the forger work loop: owner requests are GitHub issues
 labelled `ready-for-agent`, the loop builds each one on its own branch, and a PR
 merges only when the gates in `.forger/workloop.config.json` and CI pass.
 
+## What it does
+
+- Save a link from the form on `/`: an address (http or https only) and an optional title. The newest link is listed first, and links persist across restarts.
+- `POST /api/links` with `{"url", "title"}` stores a link and answers 201; an invalid address answers 400 with `{"error", "field"}`. `GET /api/links` returns `{"links": [...]}`, newest first.
+
+![Empty list](docs/screenshots/index-desktop-light.png)
+![Full list](docs/screenshots/index-full-desktop-light.png)
+
 ## Develop
 
 ```
