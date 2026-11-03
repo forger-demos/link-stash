@@ -74,3 +74,18 @@ test('missing files and path traversal are 404', async () => {
   expect((await get('/missing.txt')).status).toBe(404);
   expect((await get('/../package.json')).status).toBe(404);
 });
+
+test('tags are saved normalised, shown, and filter the list', async () => {
+  const db = openDatabase(':memory:');
+  const res = await post(db, {url: 'https://a.example', tags: ' Dev, News '});
+  expect(await res.json()).toMatchObject({tags: ['dev', 'news']});
+  await post(db, {url: 'https://b.example', tags: 'news'});
+  await post(db, {url: 'https://c.example'});
+  const urls = async (q: string) =>
+    ((await (await handle(new Request(`http://test/api/links${q}`), db)).json()) as {links: {url: string}[]}).links.map((l) => l.url);
+  expect(await urls('?tag=dev')).toEqual(['https://a.example']);
+  expect(await urls('?tag=NEWS')).toEqual(['https://b.example', 'https://a.example']);
+  expect(await urls('?tag=missing')).toEqual([]);
+  expect(await urls('')).toHaveLength(3);
+  expect(await urls('?tag=')).toHaveLength(3);
+});

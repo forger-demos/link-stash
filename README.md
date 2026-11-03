@@ -11,6 +11,8 @@ merges only when the gates in `.forger/workloop.config.json` and CI pass.
 - Save a link from the form on `/`: an address (http or https only) and an optional title. The newest link is listed first, and links persist across restarts.
 - `POST /api/links` with `{"url", "title"}` stores a link and answers 201; an invalid address answers 400 with `{"error", "field"}`. `GET /api/links` returns `{"links": [...]}`, newest first.
 
+- Tag a link with a comma-separated field on save; tags are stored trimmed and lower-case and shown on each link. Selecting a tag filters the list, and "Clear filter" shows every link again. `GET /api/links?tag=x` returns only links carrying that tag, and `POST` accepts a `tags` string. Links saved before tags existed have none.
+
 ![Empty list](docs/screenshots/index-desktop-light.png)
 ![Full list](docs/screenshots/index-full-desktop-light.png)
 

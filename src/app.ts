@@ -1,6 +1,6 @@
 import type {Database} from 'bun:sqlite';
 import {health} from './health';
-import {validateLink} from './links';
+import {parseTags, validateLink} from './links';
 import {addLink, listLinks} from './storage';
 
 const publicDir = new URL('../public/', import.meta.url);
@@ -8,13 +8,13 @@ const publicDir = new URL('../public/', import.meta.url);
 const json = (body: unknown, status = 200): Response => Response.json(body, {status});
 
 export async function handle(req: Request, db: Database): Promise<Response> {
-  const {pathname} = new URL(req.url);
+  const {pathname, searchParams} = new URL(req.url);
   if (pathname === '/api/links') {
-    if (req.method === 'GET') return json({links: listLinks(db)});
+    if (req.method === 'GET') return json({links: listLinks(db, parseTags(searchParams.get('tag'))[0])});
     if (req.method === 'POST') {
       const result = validateLink(await req.json().catch(() => null));
       if (!result.ok) return json({error: result.message, field: result.field}, 400);
-      return json(addLink(db, result.value.url, result.value.title), 201);
+      return json(addLink(db, result.value.url, result.value.title, result.value.tags), 201);
     }
     return json({error: 'method not allowed'}, 405);
   }

@@ -16,8 +16,14 @@
       <p id="url-error" class="error" role="alert" hidden></p>
       <label for="title">Title (optional)</label>
       <input id="title" name="title" type="text" autocomplete="off">
+      <label for="tags">Tags (optional, comma-separated)</label>
+      <input id="tags" name="tags" type="text" autocomplete="off">
       <button id="save" type="submit">Save</button>
     </form>
+    <p id="filter" class="filter" hidden>
+      Showing links tagged <strong id="filter-tag"></strong>
+      <button id="clear-filter" type="button" class="secondary">Clear filter</button>
+    </p>
     <p id="empty" class="empty">No links saved yet</p>
     <ul id="links" hidden></ul>
   </main>
