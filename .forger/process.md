@@ -1,4 +1,4 @@
-# Development process - <project name>
+# Development process - link-stash
 
 One ticket per iteration, quality gates green, small clean commits.
 **On GitHub, the issues are the backlog**: an open issue with the intake label is
@@ -11,7 +11,7 @@ commands are generic; everything specific to THIS project lives here and in
 
 ## What this repo is
 
-<One paragraph: what the project is, where it sits in the stack, who consumes it.>
+Link stash: people save links, tag them, search them and share a list read-only. One Bun server serves the page and a JSON API over a single SQLite database. It is the sample product forger is proved on, so the product stays ordinary and the tickets come as owner requests.
 
 ## The gates
 
@@ -53,8 +53,8 @@ as enforced, not advisory.
   lands as a tested command with machine-readable output, not as prompt text.
   Pure logic is split from I/O, and side effects sit behind an injectable `CommandRunner`.
 - **Comments say why, never narrate a change.** History belongs in the commit.
-- <e.g. "Never delete data; removal means active = 0.">
-- <e.g. "Phase 1 is read-only; no writes outside a write-scoped ticket.">
+- Every schema change is a new numbered migration; an applied migration is never edited.
+- Tests never open a port or a file database; handlers take a request and storage takes an in-memory database.
 
 The retro refines this file over time: a lesson that holds for this project
 lands here by PR, and one that holds for every project goes upstream to forger.
